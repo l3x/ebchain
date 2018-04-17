@@ -16,7 +16,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 
-	. "github.com/l3x/ebchain/chain/types"
+	. "github.com/l3x/ebchain/webfork/types"
 	"github.com/l3x/hlp"
 
 )
@@ -41,7 +41,6 @@ func main() {
 		mutex.Unlock()
 	}()
 	log.Fatal(run())
-
 }
 
 // web server
@@ -82,7 +81,7 @@ func handleGetBlockchain(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, string(bytes))
 }
 
-// takes JSON payload as an input for heart rate (BPM)
+// takes JSON payload as an input
 func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var m Message

@@ -19,6 +19,7 @@ type Message struct {
 
 // Blockchain is a series of validated Blocks
 type BlockChain []Block
+var Blockchain BlockChain
 
 func (bc BlockChain) Print()  {
 	for _, block := range bc {
@@ -44,8 +45,8 @@ func (b Block) String() string {
 
 // Message takes incoming JSON payload
 type Transaction struct {
-	From    Address `json:"from"`
-	To 		Address `json:"to"`
+	From    Address `json:"from,string"`
+	To 		Address `json:"to,string"`
 	Amount 	int `json:"amount"`
 }
 
