@@ -64,7 +64,7 @@ func isBlockValid(newBlock, oldBlock Block) bool {
 	return true
 }
 
-// SHA256 hasing
+// SHA256 hashing
 func calculateHash(block Block) string {
 	record := strconv.Itoa(block.Index) + block.Timestamp + block.Transaction.String() + block.PrevHash
 	h := sha256.New()

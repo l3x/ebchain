@@ -29,11 +29,11 @@ func (bc BlockChain) Print()  {
 
 // Block represents each 'item' in the blockchain
 type Block struct {
-	Index     int
-	Timestamp string
-	Transaction Transaction
-	Hash      string
-	PrevHash  string
+	Index     int `json:"index"`
+	Timestamp string `json:"timestamp"`
+	Transaction Transaction `json:"transaction"`
+	Hash      string `json:"hash"`
+	PrevHash  string `json:"prevhash"`
 }
 
 func (b Block) String() string {
@@ -42,11 +42,11 @@ func (b Block) String() string {
 		b.Index, b.Timestamp, b.Transaction, b.Hash, b.PrevHash)
 }
 
-// Message takes incoming JSON payload for writing heart rate
+// Message takes incoming JSON payload
 type Transaction struct {
-	From    Address
-	To 		Address
-	Amount 	int
+	From    Address `json:"from"`
+	To 		Address `json:"to"`
+	Amount 	int `json:"amount"`
 }
 
 func (tx Transaction) String() string {
