@@ -16,9 +16,7 @@ import (
 
 	. "github.com/l3x/ebchain/webchain/types"
 	"github.com/l3x/hlp"
-
 )
-
 
 
 // bcServer handles incoming concurrent Blocks
@@ -125,18 +123,9 @@ func isBlockValid(newBlock, oldBlock Block) bool {
 	return true
 }
 
-// make sure the chain we're checking is longer than the current blockchain
-func replaceChain(newBlocks []Block) {
-	mutex.Lock()
-	if len(newBlocks) > len(Blockchain) {
-		Blockchain = newBlocks
-	}
-	mutex.Unlock()
-}
-
-// SHA256 hasing
+// SHA256 hashing
 func calculateHash(block Block) string {
-	record := string(block.Index) + block.Timestamp + string(block.BPM) + block.PrevHash
+	record := strconv.Itoa(block.Index) + block.Timestamp + block.Transaction.String() + block.PrevHash
 	h := sha256.New()
 	h.Write([]byte(record))
 	hashed := h.Sum(nil)
@@ -144,7 +133,7 @@ func calculateHash(block Block) string {
 }
 
 // create a new block using previous block's hash
-func generateBlock(oldBlock Block, BPM int) (Block, error) {
+func generateBlock(oldBlock Block, tx Transaction) Block {
 
 	var newBlock Block
 
@@ -152,9 +141,18 @@ func generateBlock(oldBlock Block, BPM int) (Block, error) {
 
 	newBlock.Index = oldBlock.Index + 1
 	newBlock.Timestamp = t.String()
-	newBlock.BPM = BPM
+	newBlock.Transaction = tx
 	newBlock.PrevHash = oldBlock.Hash
 	newBlock.Hash = calculateHash(newBlock)
 
-	return newBlock, nil
+	return newBlock
+}
+
+// make sure the chain we're checking is longer than the current blockchain
+func replaceChain(newBlocks []Block) {
+	mutex.Lock()
+	if len(newBlocks) > len(Blockchain) {
+		Blockchain = newBlocks
+	}
+	mutex.Unlock()
 }

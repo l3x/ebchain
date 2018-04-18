@@ -1,14 +1,11 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"sync"
 	"time"
 
@@ -33,7 +30,7 @@ func main() {
 	go func() {
 		t := time.Now()
 		genesisBlock := Block{}
-		genesisBlock = Block{0, t.String(), Transaction{}, calculateHash(genesisBlock), ""}
+		genesisBlock = Block{0, t.String(), Transaction{}, CalculateHash(genesisBlock), ""}
 		hlp.Debug("genesisBlock", genesisBlock)
 
 		mutex.Lock()
@@ -127,21 +124,14 @@ func isBlockValid(newBlock, oldBlock Block) bool {
 		return false
 	}
 
-	if calculateHash(newBlock) != newBlock.Hash {
+	if CalculateHash(newBlock) != newBlock.Hash {
 		return false
 	}
 
 	return true
 }
 
-// SHA256 hashing
-func calculateHash(block Block) string {
-	record := strconv.Itoa(block.Index) + block.Timestamp + block.Transaction.String() + block.PrevHash
-	h := sha256.New()
-	h.Write([]byte(record))
-	hashed := h.Sum(nil)
-	return hex.EncodeToString(hashed)
-}
+
 
 // create a new block using previous block's hash
 func generateBlock(oldBlock Block, tx Transaction) Block {
@@ -154,7 +144,7 @@ func generateBlock(oldBlock Block, tx Transaction) Block {
 	newBlock.Timestamp = t.String()
 	newBlock.Transaction = tx
 	newBlock.PrevHash = oldBlock.Hash
-	newBlock.Hash = calculateHash(newBlock)
+	newBlock.Hash = CalculateHash(newBlock)
 
 	return newBlock
 }
