@@ -16,7 +16,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 
-	. "github.com/l3x/ebchain/webfork/types"
+	. "github.com/l3x/ebchain/webchain/types"
 	"github.com/l3x/hlp"
 
 )
@@ -94,7 +94,7 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	mutex.Lock()
-	newBlock := generateBlock(Blockchain[len(Blockchain)-1], m.Tx)
+	newBlock := generateBlock(Blockchain[len(Blockchain)-1], m.Transaction)
 	mutex.Unlock()
 
 	if isBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {

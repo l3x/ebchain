@@ -14,7 +14,7 @@ const (
 
 // Message takes incoming JSON payload for transaction
 type Message struct {
-	Tx Transaction
+	Transaction Transaction `json:"transaction"`
 }
 
 // Blockchain is a series of validated Blocks
@@ -32,7 +32,7 @@ func (bc BlockChain) Print()  {
 type Block struct {
 	Index     int `json:"index"`
 	Timestamp string `json:"timestamp"`
-	Transaction Transaction `json:"transaction"`
+	Transaction Transaction `json:"transaction,string"`
 	Hash      string `json:"hash"`
 	PrevHash  string `json:"prevhash"`
 }
@@ -45,21 +45,23 @@ func (b Block) String() string {
 
 // Message takes incoming JSON payload
 type Transaction struct {
-	From    Address `json:"from,string"`
-	To 		Address `json:"to,string"`
-	Amount 	int `json:"amount"`
+	From   Address `json:"from"`
+	To     Address `json:"to"`
+	Amount int     `json:"amount"`
 }
 
 func (tx Transaction) String() string {
-	return fmt.Sprintf("%d: %s -> %s", tx.Amount, tx.From.Hex(), tx.To.Hex())
+	//return fmt.Sprintf("%d: %s -> %s", tx.Amount, tx.From.Hex(), tx.To.Hex())
+	return fmt.Sprintf("%d: %s -> %s", tx.Amount, tx.From, tx.To)
 }
 
 
-// Address represents the 20 byte address of an Ethereum account.
-type Address [AddressLength]byte
+// AddressBytes represents the 20 byte address of an Ethereum account.
+type AddressBytes [AddressLength]byte
+type Address string
 
 // Sets the address to the value of b. If b is larger than len(a) it will panic
-func (a *Address) SetBytes(b []byte) {
+func (a *AddressBytes) SetBytes(b []byte) {
 	if len(b) > len(a) {
 		b = b[len(b)-AddressLength:]
 	}
@@ -67,7 +69,7 @@ func (a *Address) SetBytes(b []byte) {
 }
 
 // Hex returns an EIP55-compliant hex string representation of the address.
-func (a Address) Hex() string {
+func (a AddressBytes) Hex() string {
 	unchecksummed := hex.EncodeToString(a[:])
 	sha := sha3.NewKeccak256()
 	sha.Write([]byte(unchecksummed))
@@ -89,9 +91,9 @@ func (a Address) Hex() string {
 }
 
 
-func BytesToAddress(b []byte) Address {
-	var a Address
+func BytesToAddress(b []byte) AddressBytes {
+	var a AddressBytes
 	a.SetBytes(b)
 	return a
 }
-func HexToAddress(s string) Address   { return BytesToAddress(FromHex(s)) }
+func HexToAddress(s string) AddressBytes { return BytesToAddress(FromHex(s)) }
