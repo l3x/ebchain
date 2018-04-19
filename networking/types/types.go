@@ -2,8 +2,6 @@ package types
 
 import (
 	"fmt"
-	"encoding/hex"
-	"github.com/ethereum/go-ethereum/crypto/sha3"
 	"github.com/l3x/hlp"
 )
 
@@ -56,3 +54,6 @@ func (tx Transaction) String() string {
 // AddressBytes represents the 20 byte address of an Ethereum account.
 type Address string
 
+func (a Address) String() string {
+	return string(a)
+}

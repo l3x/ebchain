@@ -2,46 +2,51 @@ package main
 
 import (
 	"bufio"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"io"
 	"log"
 	"net"
 	"os"
-	"strconv"
 	"sync"
 	"time"
 	"fmt"
 
-	. "github.com/l3x/ebchain/webchain/types"
+	. "github.com/l3x/ebchain/networking/types"
 	"github.com/l3x/hlp"
+	"github.com/l3x/ebchain/networking/web"
 )
 
 
-// bcServer handles incoming concurrent Blocks
-var bcServer chan []Block
 var mutex = &sync.Mutex{}
 
 func main() {
 	hlp.LoadEnv()
 
-	bcServer = make(chan []Block)
+	go func() {
+		// create genesis block
+		t := time.Now()
+		genesisBlock := Block{}
+		genesisBlock = Block{0, t.String(), Transaction{}, CalculateHash(genesisBlock), ""}
+		hlp.Debug("genesisBlock", genesisBlock)
 
-	// create genesis block
-	t := time.Now()
-	genesisBlock := Block{0, t.String(), 0, "", ""}
-	hlp.Debug("genesisBlock", genesisBlock)
-	Blockchain = append(Blockchain, genesisBlock)
+		mutex.Lock()
+		Blockchain = append(Blockchain, genesisBlock)
+		mutex.Unlock()
+	}()
+	go func() {
+		// Listen for create block requests
+		log.Fatal(web.RunServer())
+	}()
 
-	httpPort := os.Getenv("PORT")
+	//BlockChainChannel = make(chan []Block)
 
 	// start TCP and serve TCP server
-	server, err := net.Listen("tcp", ":"+httpPort)
+	tcpPort := os.Getenv("TCP_PORT")
+	server, err := net.Listen("tcp", ":"+tcpPort)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("HTTP Server Listening on port :", httpPort)
+	log.Println("TCP Server Listening on port :", tcpPort)
 	defer server.Close()
 
 	for {
@@ -58,32 +63,14 @@ func handleConn(conn net.Conn) {
 
 	defer conn.Close()
 
-	io.WriteString(conn, "Enter a new BPM:")
+	io.WriteString(conn, "Wait for broadcasts...\n")
 
 	scanner := bufio.NewScanner(conn)
+	for scanner.Scan() {
+		input := scanner.Text()
+		io.WriteString(conn, input)
+	}
 
-	// take in BPM from stdin and add it to blockchain after conducting necessary validation
-	go func() {
-		for scanner.Scan() {
-			bpm, err := strconv.Atoi(scanner.Text())
-			if err != nil {
-				log.Printf("%v not a number: %v", scanner.Text(), err)
-				continue
-			}
-			newBlock, err := generateBlock(Blockchain[len(Blockchain)-1], bpm)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			if isBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {
-				newBlockchain := append(Blockchain, newBlock)
-				replaceChain(newBlockchain)
-			}
-
-			bcServer <- Blockchain
-			io.WriteString(conn, "\nEnter a new BPM:")
-		}
-	}()
 
 	// simulate receiving broadcast
 	go func() {
@@ -100,59 +87,8 @@ func handleConn(conn net.Conn) {
 		}
 	}()
 
-	for _ = range bcServer {
+	for _ = range web.BlockChainChannel {
 		hlp.Debug("Blockchain", Blockchain)
 	}
 
-}
-
-// make sure block is valid by checking index, and comparing the hash of the previous block
-func isBlockValid(newBlock, oldBlock Block) bool {
-	if oldBlock.Index+1 != newBlock.Index {
-		return false
-	}
-
-	if oldBlock.Hash != newBlock.PrevHash {
-		return false
-	}
-
-	if calculateHash(newBlock) != newBlock.Hash {
-		return false
-	}
-
-	return true
-}
-
-// SHA256 hashing
-func calculateHash(block Block) string {
-	record := strconv.Itoa(block.Index) + block.Timestamp + block.Transaction.String() + block.PrevHash
-	h := sha256.New()
-	h.Write([]byte(record))
-	hashed := h.Sum(nil)
-	return hex.EncodeToString(hashed)
-}
-
-// create a new block using previous block's hash
-func generateBlock(oldBlock Block, tx Transaction) Block {
-
-	var newBlock Block
-
-	t := time.Now()
-
-	newBlock.Index = oldBlock.Index + 1
-	newBlock.Timestamp = t.String()
-	newBlock.Transaction = tx
-	newBlock.PrevHash = oldBlock.Hash
-	newBlock.Hash = calculateHash(newBlock)
-
-	return newBlock
-}
-
-// make sure the chain we're checking is longer than the current blockchain
-func replaceChain(newBlocks []Block) {
-	mutex.Lock()
-	if len(newBlocks) > len(Blockchain) {
-		Blockchain = newBlocks
-	}
-	mutex.Unlock()
 }

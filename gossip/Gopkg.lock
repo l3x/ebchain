@@ -2,30 +2,10 @@
 
 
 [[projects]]
-  branch = "master"
-  name = "github.com/btcsuite/btcd"
-  packages = ["btcec"]
-  revision = "2be2f12b358dc57d70b8f501b00be450192efbc3"
-
-[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
-
-[[projects]]
-  name = "github.com/ethereum/go-ethereum"
-  packages = [
-    "common",
-    "common/hexutil",
-    "common/math",
-    "crypto",
-    "crypto/secp256k1",
-    "crypto/sha3",
-    "rlp"
-  ]
-  revision = "2423ae01e0d2f853512eb2b46954b5ad0754a897"
-  version = "v1.8.4"
 
 [[projects]]
   name = "github.com/joho/godotenv"
@@ -42,6 +22,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c86568c104289685b65c3dca49e9fc4ebf22239a3a4cb6d29fc962332a1ab624"
+  inputs-digest = "298b91cf015f9d5d0755b7dd643941e7717bbc383c71f8ba1b7c135aef96956d"
   solver-name = "gps-cdcl"
   solver-version = 1

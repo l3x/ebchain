@@ -1,9 +1,7 @@
 package types
 
 import (
-	"strings"
 	"testing"
-	"fmt"
 )
 
 func TestIsHexAddress(t *testing.T) {
@@ -31,32 +29,11 @@ func TestIsHexAddress(t *testing.T) {
 }
 
 
-func TestCalculateHash(t *testing.T) {
-	tests := []struct {
-		str string
-		exp bool
-	}{
-		{"0x095e7baea6a6c7c4c2dfeb977efac326af552d87", false},
-		{"095e7baea6a6c7c4c2dfeb977efac326af552d87", false},
-		{strings.ToUpper("0x095e7baea6a6c7c4c2dfeb977efac326af552d87"), false},
-		{strings.ToUpper("095e7baea6a6c7c4c2dfeb977efac326af552d87"), false},
-	}
-
-	for _, test := range tests {
-		if result := (test.str == HexToAddress(test.str).Hex()) ; result != test.exp {
-			t.Errorf("TestHexToAddress(%s) == %v; expected %v\ntest.str: %s, HexToAddress(test.str).Hex(): %s",
-				test.str, result, test.exp, test.str, HexToAddress(test.str).Hex())
-		}
-	}
-}
-
-
 func newBlock() Block {
 	var from, to Address
-	from = "0x095e7baea6a6c7c4c2dfeb977efac326af552d87"
+	from = NewAddress() //"0x095e7baea6a6c7c4c2dfeb977efac326af552d87"
 	to = "0xb94f5374fce5edbc8e2a8697c15331677e6ebf0b"
 	tx := &Transaction{from,to,1000000000000000000}
-	fmt.Printf("tx: %s\n", tx)
-	newBlock := generateBlock(genesisBlock, *tx)
+	newBlock := GenerateBlock(Blockchain[len(Blockchain)-1], *tx)
 	return newBlock
 }

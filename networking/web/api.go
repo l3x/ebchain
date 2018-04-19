@@ -1,62 +1,22 @@
-package main
+package web
 
 import (
+	"net/http"
+	"github.com/gorilla/mux"
 	"encoding/json"
 	"io"
-	"log"
-	"net/http"
-	"os"
-	"sync"
-	"time"
-
-
-	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
-
-	. "github.com/l3x/ebchain/webchain/types"
 	"github.com/l3x/hlp"
-
+	. "github.com/l3x/ebchain/networking/types"
+	"sync"
 )
 
+// BlockChainChannel handles incoming concurrent Blocks
+var BlockChainChannel chan []Block
+func init() {
+	BlockChainChannel = make(chan []Block)
+}
 
 var mutex = &sync.Mutex{}
-
-func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	go func() {
-		t := time.Now()
-		genesisBlock := Block{}
-		genesisBlock = Block{0, t.String(), Transaction{}, CalculateHash(genesisBlock), ""}
-		hlp.Debug("genesisBlock", genesisBlock)
-
-		mutex.Lock()
-		Blockchain = append(Blockchain, genesisBlock)
-		mutex.Unlock()
-	}()
-	log.Fatal(run())
-}
-
-// web server
-func run() error {
-	mux := makeMuxRouter()
-	httpPort := os.Getenv("PORT")
-	log.Println("HTTP Server Listening on port :", httpPort)
-	s := &http.Server{
-		Addr:           ":" + httpPort,
-		Handler:        mux,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
-	if err := s.ListenAndServe(); err != nil {
-		return err
-	}
-	return nil
-}
 
 // create handlers
 func makeMuxRouter() http.Handler {
@@ -93,12 +53,12 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 	mutex.Unlock()
 
 	if IsBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {
-		Blockchain = append(Blockchain, newBlock)
-		hlp.Debug("Blockchain", Blockchain)
+		newBlockchain := append(Blockchain, newBlock)
+		replaceChain(newBlockchain)
+		hlp.Debug("newBlockchain", newBlockchain)
+		BlockChainChannel <- newBlockchain
 	}
-
 	respondWithJSON(w, r, http.StatusCreated, newBlock)
-
 }
 
 func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
@@ -110,4 +70,15 @@ func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload i
 	}
 	w.WriteHeader(code)
 	w.Write(response)
+}
+
+// Helpers
+
+// make sure the chain we're checking is longer than the current blockchain
+func replaceChain(newBlocks []Block) {
+	mutex.Lock()
+	if len(newBlocks) > len(Blockchain) {
+		Blockchain = newBlocks
+	}
+	mutex.Unlock()
 }

@@ -26,9 +26,26 @@
 
 
 [[constraint]]
+  name = "github.com/ethereum/go-ethereum"
+  version = "1.8.4"
+
+[[constraint]]
+  name = "github.com/gorilla/mux"
+  version = "1.6.1"
+
+[[constraint]]
+  name = "github.com/joho/godotenv"
+  version = "1.2.0"
+
+[[constraint]]
   branch = "master"
   name = "github.com/l3x/hlp"
 
 [prune]
   go-tests = true
   unused-packages = true
+
+[[prune.project]]
+    name = "github.com/ethereum/go-ethereum"
+    non-go = false
+    unused-packages = false

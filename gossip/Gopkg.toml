@@ -26,10 +26,6 @@
 
 
 [[constraint]]
-  name = "github.com/ethereum/go-ethereum"
-  version = "1.8.4"
-
-[[constraint]]
   branch = "master"
   name = "github.com/l3x/hlp"
 
