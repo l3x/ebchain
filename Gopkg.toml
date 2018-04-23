@@ -38,8 +38,8 @@
   version = "1.2.0"
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/l3x/hlp"
+  name = "github.com/googollee/go-socket.io"
+  version = "0.9.x"
 
 [prune]
   go-tests = true

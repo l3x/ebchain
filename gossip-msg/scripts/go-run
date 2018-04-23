@@ -1,0 +1,16 @@
+#!/bin/bash
+# go-run 7001
+MY_PORT=$1
+BROADCAST_PORT=$2
+if [ -z $MY_PORT ]; then
+    MY_PORT=7000
+fi
+if [ -z $BROADCAST_PORT ]; then
+    BROADCAST_PORT=7000
+fi
+
+set -x
+go run $(go-files-here) \
+    -p $MY_PORT \
+    -b $BROADCAST_PORT
+{ set +x; }

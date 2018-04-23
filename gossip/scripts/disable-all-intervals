@@ -1,0 +1,6 @@
+#!/bin/bash
+
+. disable-interval-for 7000
+. disable-interval-for 7001
+. disable-interval-for 7002
+. disable-interval-for 7003
